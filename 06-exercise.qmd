@@ -57,11 +57,11 @@ Use `dplyr` verbs to create a data.frame of the **5** counties with the most cur
 (**Hint:** `filter`, `arrange`, `slice`)
 
 ```{r}
-> covid %>% 
-+ filter(date == max(date)) %>% 
-+ select(date, county, cases) %>% 
-+ arrange(-cases) %>% 
-+ slice(1:5)
+covid %>%
+  mutate(date = as.Date(date)) %>% 
+  filter(date == max(date)) %>% 
+  arrange(desc(cases)) %>%
+  slice_head(n = 5)  
 ```
 
 ## Question 2:
@@ -71,13 +71,13 @@ Use `dplyr` verbs to create a data.frame of the **5** states with the *most* cas
 (**Hint:** `filter`, `group_by`, `summarize`, `arrange`, `slice`)
 
 ```{r}
-> covid %>% 
-+ select(date, state, cases) %>% 
-+ filter(date == max(date, na.rm = TRUE)) %>% 
-+ group_by(state) %>% 
-+ summarize(cases = sum(cases, na.rm = TRUE)) %>% 
-+ arrange(-cases) %>% 
-+ slice(1:5)
+covid %>% 
+  select(date, state, cases) %>% 
+  filter(date == max(date, na.rm = TRUE)) %>% 
+  group_by(state) %>% 
+  summarize(cases = sum(cases, na.rm = TRUE)) %>% 
+  arrange(desc(cases)) %>% 
+  slice(1:5)
 ```
 
 ## Question 3:
@@ -87,11 +87,11 @@ Use the `dplyr` verbs to report the **5** counties with the *worst* current deat
 (**Hint:** You will need to remove those where `cases == 0` and `county == Unknown`) (**Hint:** `filter`, `mutate`, `arrange`, `slice`)
 
 ```{r}
-> covid %>% 
-+ filter(date == max(date), cases > 0, county != "Unknown") %>% 
-+ mutate(death_case_ratio = deaths/cases*100) %>% 
-+ arrange(-death_case_ratio) %>% 
-+ slice(1:5)
+covid %>% 
+  filter(date == max(date, na.rm = TRUE), cases > 0, county != "Unknown") %>%
+  mutate(death_case_ratio = deaths / cases * 100) %>%
+  arrange(desc(death_case_ratio)) %>% 
+  slice(1:5)
 ```
 
 ## Question 4:
@@ -101,11 +101,11 @@ Use the `dplyr` verbs to report the **5** states with the *worst* current death/
 (**Hint:** `filter`, `group_by`, `summarize`, `mutate`, `arrange`, `slice`)
 
 ```{r}
-> covid %>% 
-+ filter(date == max (date), cases > 0, county != "Unknown") %>% 
-+ mutate(death_case_ratio = deaths/cases) %>% 
-+ group_by(state) %>% 
-+ summarize(death_case_ratio = mean(death_case_ratio, na.rm = TRUE)) %>% 
-+ arrange(-death_case_ratio) %>% 
-+ slice (1:5)
+covid %>% 
+  filter(date == max(date), cases > 0, county != "Unknown") %>% 
+  mutate(death_case_ratio = deaths / cases) %>%
+  group_by(state) %>% 
+  summarize(average_death_case_ratio = mean(death_case_ratio, na.rm = TRUE)) %>%
+  arrange(desc(average_death_case_ratio)) %>% 
+  slice(1:5)
 ```
