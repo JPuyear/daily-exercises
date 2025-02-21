@@ -54,7 +54,9 @@ to print the top 5 columns of the raw covid `object`
 
 Use `dplyr` verbs to create a data.frame of the **5** counties with the most current cases. Remember, the cases and deaths are cumulative, so you only need to deal with the data for the most current (`max`) date.
 
-```         
+(**Hint:** `filter`, `arrange`, `slice`)
+
+```{r}
 > covid %>% 
 + filter(date == max(date)) %>% 
 + select(date, county, cases) %>% 
@@ -62,16 +64,13 @@ Use `dplyr` verbs to create a data.frame of the **5** counties with the most cur
 + slice(1:5)
 ```
 
-(**Hint:** `filter`, `arrange`, `slice`)
-
-```{r}
-```
-
 ## Question 2:
 
 Use `dplyr` verbs to create a data.frame of the **5** states with the *most* cases current cases.
 
-```         
+(**Hint:** `filter`, `group_by`, `summarize`, `arrange`, `slice`)
+
+```{r}
 > covid %>% 
 + select(date, state, cases) %>% 
 + filter(date == max(date, na.rm = TRUE)) %>% 
@@ -79,12 +78,6 @@ Use `dplyr` verbs to create a data.frame of the **5** states with the *most* cas
 + summarize(cases = sum(cases, na.rm = TRUE)) %>% 
 + arrange(-cases) %>% 
 + slice(1:5)
-```
-
-(**Hint:** `filter`, `group_by`, `summarize`, `arrange`, `slice`)
-
-```{r}
-
 ```
 
 ## Question 3:
