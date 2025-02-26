@@ -66,7 +66,7 @@ covid %>%
 
 ## Question 2:
 
-Use `dplyr` verbs to create a data.frame of the **5** states with the *most* cases current cases.
+Use `dplyr` verbs to create a data.frame of the **5** states with the *most* current cases
 
 (**Hint:** `filter`, `group_by`, `summarize`, `arrange`, `slice`)
 
