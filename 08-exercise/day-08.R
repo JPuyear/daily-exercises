@@ -18,18 +18,15 @@ head(covid, 5)
 # base R. Be intentional about creating a primary 
 #key to match to the COVID data!
 
-df = data.frame(state = state.name, region = state.region, abbreviation = state.abb)
-
 
 # example code
 #df = data.frame(region = state.region,
 #                ...,
 #          ...)
 
-
 df <- data.frame(region = state.region,
                  abbr = state.abb,
-                 state = state.name) 
+                 state = state.name)
 head(df)
 
 
@@ -38,16 +35,21 @@ head(df)
 #Think about right, inner, left, or full join…
 
 covid_region <- inner_join(df, covid, by = "state") |>
-  group_by(region, date) |>  # split-apply the joined data to determine the daily,
-  summarize(cases = sum(cases),  # cumulative, cases and deaths for each region
+  group_by(region, date) |>  
+# split-apply the joined data to determine the daily,
+  summarize(cases = sum(cases),  
+# cumulative, cases and deaths for each region
             deaths = sum(deaths), 
-            .groups = "drop") |>  # Remove grouping to prevent issues
-  pivot_longer(cols = c(cases, deaths), # Pivot your data from wide format to long
+            .groups = "drop") |>  
+# Remove grouping to prevent issues
+  pivot_longer(cols = c(cases, deaths),
+# Pivot your data from wide format to long
                names_to = "type",
                values_to = "count") |>
   ggplot(aes(x = date, y = count, group = type, color = type)) +  # Ensure grouping
-  geom_line() +                 # Plot your data in a compelling way (setup, layers,
-                                # labels, facets, themes)
+  geom_line() +                 
+# Plot your data in a compelling way (setup, layers,
+# labels, facets, themes)
   facet_grid(type ~ region) +
   theme_bw()
 
