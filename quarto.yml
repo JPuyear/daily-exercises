@@ -1,0 +1,6 @@
+project:
+  title: "esss-330-daily-exercises"
+
+format:
+  html:
+    self-contained: true

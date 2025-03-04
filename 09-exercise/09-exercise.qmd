@@ -1,0 +1,183 @@
+---
+title: "Daily Exercise 9: Building Linear Models"
+author: "Joshua Puyear"
+date: 2025-03-03
+format: html
+---
+
+knitr::opts_chunk\$set(fig.width = 7, fig.height = 5)
+
+# Assignment
+
+# Q1: Using the airquality from R datasets, use the help (?) function to learn more about the dataset
+
+```{r, echo = TRUE}
+# ?airquality
+
+library(tidyverse)
+library(dplyr)
+library(broom)
+library(ggplot2)
+library(visdat)
+
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5)
+```
+
+1. It says this air quality data is from 1973 and there are 6 columns:
+\[,1\] Ozone numeric Ozone (ppb)
+\[,2\] Solar.R numeric Solar R (lang)
+\[,3\] Wind numeric Wind (mph)
+\[,4\] Temp numeric Temperature (degrees F)
+\[,5\] Month numeric Month (1--12)
+\[,6\] Day numeric Day of month (1--31)
+
+# Q2. Use vis_dat to check out the data. Does it need cleaning?
+
+```{r, echo = TRUE}
+vis_dat(airquality)
+
+```
+
+2. Yes, it looks like a lot of NAs exist in the ozone and solar R categories.
+
+# Q3. Fit a linear model to the cleaned data to predict Ozone from one of the possible predictors of your choosing. Why did you chose that variable?
+
+3. I'm predicting ozone based on solar radiation because heat in the atmosphere increases the reactivity of molecules in the exhaust to become ozone.
+
+```{r, echo = TRUE}
+#Making sure values are distinct
+library(dplyr)
+ aq_clean <- airquality %>% 
+  distinct() %>% 
+  drop_na()  
+ 
+#dropping NA values- not sure if I want to do this because it removes the entire row when there are observations in other columns
+
+#imputation = calculations on the data to look for errors; this is another method of data cleaning
+
+#making a linear model
+
+
+
+```
+
+```{r, echo = TRUE}
+model <- lm(Ozone ~ Solar.R, data = aq_clean) 
+```
+
+
+```{r, echo = TRUE}
+model <- lm(Ozone ~ Solar.R, data = aq_clean)
+
+```
+
+```{r, echo = TRUE}
+plot(model, which  = 1)
+```
+
+```{r, echo = TRUE}
+plot(model, which = 2)
+```
+
+```{r, echo = TRUE}
+#trying a multiple regression model
+
+mult_model <- lm(Ozone ~ Wind + Temp + Month + Day + Solar.R, data = aq_clean)
+
+plot(mult_model, which = 1)
+
+
+#I've realized there are fewer degrees of freedom and lower standard error with more variables
+
+
+```
+
+```{r, echo = TRUE}
+summary(mult_model)
+
+```
+
+# Q4. Using summary(), Does this seem like a valid model?
+
+4. The output for summary() says that residual standard error is 31.22 on 109 degrees of freedom. I'm not sure if this is makes it a valid model or not. However, there is a whole host of other factors I can look at to evaluate the effectiveness of this model. The adjusted R squared is .1133, which shows a weak positive correlation, and the Shapiro-wilkes test has a very low p-value of .25\^-6. Typically, a p-value of .05 or less is accepted as significant in science. Looking at the p-value from the ozone coeffcient (p = .000179), this is an efficient model.
+
+```{r, echo = TRUE}
+
+shapiro.test(model$residuals)
+# data:  model$residuals
+#W = 0.91418, #p-value = 2.516e-06
+
+#graph comes out as residuals vs fitted. What does this mean? Residuals = having to do with R^2, fitted
+
+#fitted = prediction ofthe mean response value when you put predisctors, factor levels, or componenets into the model
+ 
+```
+
+```{r, echo = TRUE}
+summary(model)
+#output says residual standard error is 31.22 on 109 degrees of freedom
+
+```
+
+# Q5. Explain the R2 found in a sentence.
+
+5. The adjusted R2 value, or the coefficient of determination, is the closeness to the line of best fit of the response variable ozone based on the predictor variable, which in this case is solar radiation. At .1133, 11.33% of variance in ozone is predictable from solar radiation. Compare this to a multiple regression's r-squared at .6071, which means that 60.7% of ozone variance can be predicted by the sum of all the variables. Adding more variables in this case made the model have greater success at predicting variance. Looking at the graph, there are outliers that prevent residuals vs fitted values from having a linear shape.
+
+# Q6. Use broom::augment to predict the Ozone of the cleaned data
+
+```{r, echo = TRUE}
+#get a lot of features from summary but more concise
+tidy(model, conf.int = TRUE)
+
+#look at variance statistsics incl. r.squared
+glance(model)
+
+#for adding model diagnostics to the original data or predicting. This gives each observation a predicted (.fitted) value, the difference between observed and predicted (.resid), Cook's  distance (each observation's influence on the model performance),.hat(shows if an observation has unusually high influence on a model's performance), and .std.resid (looks for unusual or outlier observations)
+a <- augment(model, new_data = aq_clean)
+
+```
+
+# Q7. Use ggplot to plot the actual vs predicted Ozone
+
+```{r, echo = TRUE}
+a %>% 
+ggplot(aes(x = .fitted, y = Ozone)) +
+geom_point() +
+theme_bw()
+
+str(a)
+summary(a)
+
+
+```
+
+# Q8.
+
+### 8a) Add a red line to show where the actual and predicted values are equal This can be done by plotting a 1:1 line (e.g. intercept 0, slope 1) with geom_abline(intercept = 0, slope = 1, color = "red")
+
+```{r, echo = TRUE}
+a %>% 
+ggplot(aes(x = .fitted, y = Ozone)) +
+geom_point() +
+geom_abline(intercept = 0, slope = 1, color = "red")
+theme_bw()
+
+```
+
+### 8b. Add a subtitle to the plot showing the correlation between the actual and predicted values are equal This can be done by plotting a 1:1 line (e.g. intercept 0, slope 1) with
+
+```{r, echo = TRUE}
+a %>% 
+ggplot(aes(x = .fitted, y = Ozone)) +
+labs(title = "Actual vs Predicted Ozone Values Based on Solar Radiation",
+  subtitle = "Correlation: 0.35") +
+geom_point() +
+geom_abline(intercept = 0, slope = 1, color = "red")
+theme_bw()
+
+
+round(cor(a$Ozone, a$.fitted),2)
+
+```
+
+### 8c. paste("Correlation:", round(cor(a$Ozone, a$.fitted),2)) assuming your augmented data object is called a \^
