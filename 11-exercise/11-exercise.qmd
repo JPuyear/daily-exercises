@@ -1,0 +1,78 @@
+## Part 1: Normality Testing
+
+Q1. Load the airquality dataset in R. What does this dataset represent? Explore its structure using functions like str() and summary().
+```{r, echo = TRUE}
+library(dplyr)
+library(tidyverse)
+```
+```{r, echo = TRUE}
+?airquality
+colnames(airquality)
+head(airquality)
+str(airquality)
+summary(airquality)
+
+```
+1. The data represent air quality in New York for the months of May-September, 1973. 
+
+
+
+Q2. Perform a Shapiro-Wilk normality test on the following variables: Ozone, Temp, Solar.R, and Wind.
+
+```{r, echo = TRUE}
+  shapiro.test(airquality$Ozone)
+  shapiro.test(airquality$Temp)
+  shapiro.test(airquality$Solar.R)
+  shapiro.test(airquality$Wind)
+
+```
+
+Q3. What is the purpose of the Shapiro-Wilk test?
+
+3. The Shapiro-Wilk test is for checking normality of a small dataset.It provides W, the Shapiro-Wilk statistic, and the p-value. The Shapiro-Wilk statistic is a number between 0 and 1 that predicts how likely a value is to be normally distributed. It compares expected values to observed valuees in order of their ocurrence in the data. Closer to 1 = more likely. A high p-value indicates a normal distribution.
+
+```{r, echo = TRUE}
+?shapiro.test()
+
+```
+
+Q4. What are the null and alternative hypotheses for this test?
+
+4. The null hypothesis is that the data are normally distributed. An alternative hypothesis is that the data are not normally distributed.
+
+Q5. Interpret the p-values. Are these variables normally distributed?
+
+```{r, echo = TRUE}
+
+ shapiro.test(airquality$Ozone)
+  shapiro.test(airquality$Temp)
+  shapiro.test(airquality$Solar.R)
+  shapiro.test(airquality$Wind)
+
+```
+5. The p-values are all below .05 except for Wind which has a p-value of .1178. This suggests that all except wind have non-normal distributions.
+
+## Part 2: Data Transformation and Feature Engineering
+
+Q6. Create a new column with case_when translating the Months into four seasons (Winter (Nov, Dec, Jan), Spring (Feb, Mar, Apr), Summer (May, Jun, Jul), and Fall (Aug, Sep, Oct)).
+
+```{r, echo = TRUE}
+aq_seasons <- airquality %>% 
+  mutate(season = case_when(
+    Month %in% c(11, 12, 1) ~ "Winter",
+    Month %in% c(2, 3, 4) ~ "Spring",
+    Month %in% c(5, 6, 7) ~ "Summer",
+    Month %in% c(8, 9, 10) ~ "Fall"
+  ))
+
+```
+
+
+Q7. Use table to figure out how many observations we have from each season
+
+```{r, echo = TRUE}
+table(aq_seasons$season, useNA = "ifany", dnn = "Season")
+
+```
+
+
