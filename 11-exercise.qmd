@@ -1,6 +1,5 @@
 ---
 project:
-  output-dir: docs
 title: "exercise-11/12"
 author: "JPuyear"
 format: html
