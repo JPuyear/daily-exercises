@@ -1,2 +1,2 @@
-# 06-exercise
-Wrangling COVID data
+# Daily Exercises
+[Daily exercise 6](06-exercise.html)
