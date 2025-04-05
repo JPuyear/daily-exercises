@@ -1,5 +1,6 @@
 project:
   title: "esss-330-daily-exercises"
+    output-dir: docs
 
 format:
   html:

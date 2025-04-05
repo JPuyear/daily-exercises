@@ -1,0 +1,231 @@
+---
+project:
+title: "exercise-11/12"
+author: "JPuyear"
+format: html
+date: "2025-04-01"
+editor: visual
+execute: 
+  echo: true
+---
+
+## Part 1: Normality Testing
+
+### Q1. Load the airquality dataset in R. What does this dataset represent? Explore its structure using functions like str() and summary().
+```{r, echo = TRUE}
+library(dplyr)
+library(tidyverse)
+library(ggpubr)
+
+```
+
+```{r, echo = TRUE}
+?airquality
+colnames(airquality)
+head(airquality)
+str(airquality)
+summary(airquality)
+
+```
+1. The data represent air quality in New York for the months of May-September, 1973. 
+
+
+### Q2. Perform a Shapiro-Wilk normality test on the following variables: Ozone, Temp, Solar.R, and Wind.
+
+```{r, echo = TRUE}
+  shapiro.test(airquality$Ozone)
+  shapiro.test(airquality$Temp)
+  shapiro.test(airquality$Solar.R)
+  shapiro.test(airquality$Wind)
+
+```
+
+### Q3. What is the purpose of the Shapiro-Wilk test?
+
+3. The Shapiro-Wilk test is for checking normality of a small dataset. It provides W, the Shapiro-Wilk statistic, and the p-value. The Shapiro-Wilk statistic is a number between 0 and 1 that predicts how likely a value is to be normally distributed. It compares expected values to observed valuees in order of their ocurrence in the data. Closer to 1 = more likely. A high p-value indicates a normal distribution.
+
+```{r, echo = TRUE}
+?shapiro.test()
+
+```
+
+### Q4. What are the null and alternative hypotheses for this test?
+
+4. The null hypothesis is that the data are normally distributed. An alternative hypothesis is that the data are not normally distributed.
+
+### Q5. Interpret the p-values. Are these variables normally distributed?
+
+```{r, echo = TRUE}
+
+ shapiro.test(airquality$Ozone)
+  shapiro.test(airquality$Temp)
+  shapiro.test(airquality$Solar.R)
+  shapiro.test(airquality$Wind)
+
+```
+5. The p-values are all below .05 except for Wind which has a p-value of .1178. This suggests that all except wind have non-normal distributions because p < .05 (or .1 per the documentations' recommendations) means you can reject the null hypothesis of a normal distribution.
+
+## Part 2: Data Transformation and Feature Engineering
+
+
+
+### Q6. Create a new column with case_when translating the Months into four seasons (Winter (Nov, Dec, Jan), Spring (Feb, Mar, Apr), Summer (May, Jun, Jul), and Fall (Aug, Sep, Oct)).
+
+```{r, echo = TRUE}
+airquality <- airquality %>% 
+  mutate(season = case_when(
+    Month %in% c(11, 12, 1) ~ "Winter",
+    Month %in% c(2, 3, 4) ~ "Spring",
+    Month %in% c(5, 6, 7) ~ "Summer",
+    Month %in% c(8, 9, 10) ~ "Fall"
+  ))
+
+```
+
+
+### Q7. Use table to figure out how many observations we have from each season
+
+```{r, echo = TRUE}
+table(airquality$season, useNA = "ifany", dnn = "Season")
+
+```
+## Part 3: Data Preprocessing
+### Q8 Normalize the predictor variables (Temp, Solar.R, Wind, and Season) using a recipe
+
+``` {r, echo = TRUE}
+#I wanted to check the data to see which normalization technique would be best based on ability to deal with outliers.
+
+library(visdat)
+vis_dat(airquality)
+
+p1 <- gghistogram(airquality, x = "Month")
+p2 <- gghistogram(airquality, x = "Solar.R")
+p3 <- gghistogram(airquality, x = "Wind")
+p4 <- gghistogram(airquality, x = "Temp")
+
+ggarrange(p1, p2, p3, p4, ncol = 2, nrow = 4)
+
+
+#go with a norm technique that's fairly robust against outliers. I don't think it matters a ton which one you choose though
+```
+
+
+``` {r, echo = TRUE}
+#I'm going with step_normalize (z-score standardization) because Solar.R has a pretty wide split.
+
+library(recipes)
+
+(recipe_obj <- recipe(Ozone ~ 
+                       Solar.R + Wind + 
+                       Temp + season, 
+                      data = airquality) |> 
+  step_impute_mean(all_numeric_predictors()) |>
+  step_dummy(all_factor_predictors()) |>
+  step_normalize(all_numeric_predictors()))
+
+
+```
+
+### Q9 What is the purpose of normalizing data?
+
+Data are normalized to keep statistical tests valid, as many assume a normal distribution in the data to work. The lecture mentions t-test, ANOVA, linear regression, PCA, confidence intervals, parameter estimation, and hypothesis testing. Normalized data helps with machine learning, an integral component of ecology, because it improves model convergence, prevents domination of one major feature over others, enhances comparison among variables, and allows distance based methods to be used like k-nearest neighbor and PCA.
+
+### Q10 What function can be used to impute missing values with the mean?
+
+I didn't know what impute meant before this, but apparently it means assigning a value to missing data when actual values aren't available.
+
+Answer: step_impute_mean()
+
+### Q11. prep and bake the data to generate a processed dataset.
+``` {r, echo = TRUE}
+#the presence of NA in the data means we probably need impute.
+
+library(tidymodels)
+
+
+# Prepare and apply transformations
+prep_recipe     <- prep(recipe_obj, training = airquality) 
+
+normalized_data <- bake(prep_recipe, new_data = NULL) |> 
+  drop_na()
+
+
+
+```
+
+### Q12. Why is it necessary to both prep() and bake() the recipe?
+
+While prep() estimates the parameters (which are calculated means and values from functions like step_impute_mean in the recipe) for transformations, bake() applies those transformations to the data set. Thus, prep and bake provide different roles. Maybe after prep, you realize that the parameters are off and you need to change them. Then, you can tweak some earlier operation before following it up with bake. Prep figures out the parameters from the training data, while bake applies those parameters to the actual data.
+
+
+## Part 4: Building a Linear Regression Model
+
+### Q13. Fit a linear model using Ozone as the response variable and all other variables as predictors. Remeber that the . notation can we used to include all variables.
+
+``` {r, echo = TRUE}
+(model = lm(Ozone ~ . , data = normalized_data) )
+
+glance(model)
+
+(pred <- augment(model, normalized_data))
+
+ggscatter(pred,
+          x = 'Ozone', y = '.fitted',
+          add = "reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method = "pearson",
+          color = "navy", palette = "jco")
+
+```
+
+
+### Q14. Interpret the model summary output (coefficients, R-squared, p-values) in plain language
+
+At R^2 = .77, there is a strong positive correlation bectween the predictors and the response. The highest coefficient is when the season is summer, at 42.213. Temperature also plays an important role: the coefficient is 16.376. Wind has a negative coefficient, so the more wind, the less ozone, which makes sense. The coefficient for solar radiation is 4.857, so it's slightly less influential on ozone than the other factors but still has an effect. The combination of other variables in relation to ozone has an extremely strong relationship, at p < 2.2 e -16. This means that the predictors have a low probability of a type I error of failing to reject a true null hypothesis.
+
+# Part 5: Model Diagnostics
+
+### Q15.Use broom::augment to supplement the normalized data.frame with the fitted values and residuals.
+``` {r, echo = TRUE}
+a <- broom::augment(model, normalized_data)
+
+```
+
+
+### Q16 Extract the residuals and visualize their distribution as a histogram and qqplot.
+``` {r, echo = TRUE}
+p5 <- gghistogram(model, x = ".resid")
+
+p6 <- ggqqplot(model, x = 'Ozone', color = "navy")
+
+```
+
+
+### Q17 Use ggarrange to plot this as one image and interpret what you see in them.
+``` {r, echo = TRUE}
+ggarrange(p5, p6, ncol = 2, nrow = 1)
+
+```
+
+#### Q 17 Response:
+My interpretation of this is that the residuals have a normal distribution. If the residuals are somewhat randomly distributed around zero, the model suggests random error, which supports its validity. If we were to see a one-sided residual curve, the model would be predicting too high or too low of values consistently. It looks like the sample and theoretical have the strongest correlation between 1 and 2 but the linear line of best fit isn't ideal for this data. It's probably more accurate to have an exponential line of best fit. For the range of the data, though, this works.
+
+### Q18 Create a scatter plot of actual vs. predicted values using ggpubr with the following setting:
+
+``` {r, echo = TRUE}
+
+ggscatter(a, x = "Ozone", y = ".fitted", 
+          add = "reg.line", conf.int = TRUE,
+          cor.coef = TRUE, cor.method = "spearman",
+          ellipse = TRUE)
+
+```
+
+### Q19 How strong of a model do you think this is?
+
+There's a bit of clustering where ozone is observed at lower levels (residuals are higher), but as ozone levels become higher, the line of best fit becomes more accurate. Since R^2 is .83, the model's predicted values have a strong correlation with actual values. Therefore, the model is relatively strong, but not exacting. If you're trying to predict exact atmospheric Ozone levels for a chemical reaction, I would try to find a more accurate model.
+
+
+### Q20 Render your document to HTML and submit to Canvas. Be sure to include this in your document yml:
+
+
+

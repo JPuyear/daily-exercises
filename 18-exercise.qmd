@@ -1,0 +1,130 @@
+---
+title: "18-exercise"
+format: html
+editor: visual
+---
+
+
+```{r, echo = TRUE}
+
+library(tidyverse)
+
+library(tidymodels)
+
+
+covid_url <- 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+pop_url <- 'https://www2.census.gov/programs-surveys/popest/datasets/2020-2023/counties/totals/co-est2023-alldata.csv'
+
+data <- readr::read_csv(covid_url)
+census_raw <- readr::read_csv(pop_url)
+
+
+census <- census_raw |>
+filter(COUNTY == "000") |>
+mutate(fips = STATE) |>
+select(fips, POPESTIMATE2021, DEATHS2021, BIRTHS2021)
+
+state_data <- data |>
+group_by(fips) |>
+mutate(new_cases = pmax(cases - lag(cases)),
+new_deaths = pmax(deaths - lag(deaths)))
+#pmax eliminates negative values from corrections to case numbers
+ungroup()
+#prioritize state data in join
+left_join(census, by = "fips")
+#why are we using this pipe operator?
+mutate(y = year(dataee), m = month(date),
+#vectorized version of an if statement
+season = case_when(
+m %in% c(12,1,2)) ~ "Winter",
+m %in% 3:5 ~ "Spring",
+m %in% 6:8 ~ "Summer",
+m %in% 9:11 ~ "Fall"
+)) |>
+group(state, season) |>
+#summarize says only return 1 individual value
+mutate(
+season_cases = sum(new_case, na.rm = TRUE),
+season_deaths = sum(new_deaths, na.rm = TRUE)) |>
+  distinct(state, y, season, .keep_all = TRUE) |>
+  ungroup() |>
+  select(state, contains("season"), contains("2021")) |>
+  drop_na() |>
+  nutate(logC = log(season_cases + 1))
+#should have 778 obs
+
+skimr::skim(state_data)
+
+###ML Applications
+
+#this is where the maching learning comes in. remember 70-30 split, or in this case 80-20
+set.seed(123)
+split <- initial_split(state_data, prop = .8, strata = season)
+training <- training(split)
+testing <- testing(split)
+folds <- rsamples::vfold_cv(train, v = 10)
+
+#513 is made up of the 57 from the other 9 sets
+
+#we want to be able to test each model against each other- so neural nets, models, other stuff
+
+#looking back at eda, we can see the data are non-normal dist (big tail)
+
+#here is the recipe
+rec <- recipe(season_caes ~ .,) |>
+  step_rm(state) |>
+  step_dummy(all_nominal_predictors(()) |>
+  step_scale(all_numberic_predictors()) |>
+    step_center(all_numberic_predictors())
+  #scaling recenters data within a larger range to start at zero
+#centering with a transformation
+  
+  
+lm_mod <- linear_reg() |>
+  set_engine('lm') |>
+  set_mode("regression")
+
+
+rf_mod2 <- rand_forest() |>
+  set_engine('ranger') |>
+  set_mode("regression")
+
+rf_mod2 <- rand_forest() |>
+  set_engine('xgboost') |>
+  set_mode("regression")
+
+lm_mod <- boost_tree() |>
+  set_engine('lm') |>
+  set_mode("regression")
+
+
+
+wf = workflow_set(list(rec), list(lm_mod,
+                                   rf_mod,
+                                   rf_mod2,
+                                   b_mod,
+                                   nn_mod))
+
+|>
+  workflow_map(resample = folds)
+
+autoplot(wf)
+
+#at this point mike went back because error was 250,000 which doesn't make sense
+
+b_fit = workflow() |>
+  add_recipe(rec) |>
+  add_model(b_mod) |>
+  fit(data = traing)
+
+a = augment(b_fit, new_data = training)
+
+
+ggplot(a, aes(x = .pred, y = logC))
++
+  geom_point()
+
+
+vip::vip(b_fit)
+
+#at this point, mike went back to step_rm and 
