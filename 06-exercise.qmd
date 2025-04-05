@@ -1,16 +1,10 @@
 ---
+project:
+  output-dir: 06-and-up-exercise-330/docs
 title: "exercise-06"
 author: "JPuyear"
 format: html
 editor: visual
----
-
----
-title: "Ecosystem Science and Sustainability 330"
-author:
-  - name: Mike Johnson
-format: html
-subtitle: 'Quantitative Reasoning for Ecosystem Science'
 ---
 
 ```{r setup, include=FALSE}
