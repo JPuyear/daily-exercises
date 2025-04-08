@@ -1,5 +1,6 @@
 ---
 title: "Daily Exercise 9: Building Linear Models"
+output-dir: docs
 author: "Joshua Puyear"
 date: 2025-03-03
 format: html

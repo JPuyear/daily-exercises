@@ -1,0 +1,25 @@
+---
+title: "Projects"
+format: html
+editor: visual
+output-dir: docs
+---
+
+![]()
+
+![]()
+
+![]()
+
+![]()
+
+![]()
+
+![]()
+
+![]()
+
+![]()
+
+![]()
+

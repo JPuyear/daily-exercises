@@ -1,0 +1,155 @@
+---
+title: "Daily Exercise 13: Review"
+output-dir: docs
+author: "Joshua Puyear"
+format: html
+execute: 
+  echo: true
+
+---
+
+
+Motivation
+The balance between bicarbonate and Mg+Ca in water determines hardness, alkalinity, and pH stability, with direct implications for ecosystem health, water treatment, and infrastructure maintenance. The sum of magnesium and calcium concentrations is a key factor in determining water hardness which can impact aquatic ecosystems, water treatment, and infrastructure due to scaling.
+
+⬆️ bicarbonate + ⬆️ Ca/Mg: Indicates water passing through carbonate-rich geology (limestone/dolomite), leading to high hardness but good buffering capacity.
+
+⬇️ bicarbonate + ⬆️ Ca/Mg: Suggests non-carbonate sources of Mg and Ca, potentially from industrial pollution or weathering of silicate rocks.
+
+⬆️ bicarbonate + ⬇️ Ca/Mg: Could be influenced by inputs like agricultural runoff or natural dissolution of bicarbonates from atmospheric CO₂.
+
+In this lab, we are interested in understanding the relationship between bicarbonate and magnesium/calcium in the Colorado River Basin using a set of gages that have been active over the last ~100 years
+
+Namely, we are interested in:
+
+The trend of Bicarbonate over time
+The relationship of Bicarbonate to Magnesium + Calcium along the river
+The strength of a predictive model for Bicarbonate using the sum Magnesium Calcium
+
+
+1. Data Import & Setup
+
+``` {r, echo = TRUE}
+library(tidyverse)
+library(tidymodels)
+library(dataRetrieval)
+library(flextable)
+library(visdat)
+
+```
+
+
+We can predefine our sites of interest for expediency. We do this by creating a data frame with the SiteID and SiteName atomic vectors.
+
+We can also predefine the variables we are interested in.
+
+``` {r, echo = TRUE}
+sites <-  tibble(SiteID = c("USGS-09069000", "USGS-09085000", "USGS-09095500",
+                                "USGS-09152500", "USGS-09180000", "USGS-09380000"),
+                     SiteName = c("Eagle", "Roaring Fork", "Colorado 3", 
+                                  
+                                  "Gunnison", "Dolores", "Colorado 5")) 
+
+
+vars  <- c('Magnesium', 'Calcium', 'Bicarbonate')
+
+```
+
+Explore the Sites
+
+``` {r, echo = TRUE}
+site.info <- whatWQPsites(siteid = sites$SiteID) 
+#> GET:https://www.waterqualitydata.us/data/Station/search?siteid=USGS-09069000%3BUSGS-09085000%3BUSGS-09095500%3BUSGS-09152500%3BUSGS-09180000%3BUSGS-09380000&mimeType=csv&count=no
+names(site.info)
+
+```
+
+# Makng a map
+``` {r, echo = TRUE}
+## Make a map!
+ggplot(site.info, aes(x = LongitudeMeasure, y = LatitudeMeasure)) + 
+  borders("state") +
+  geom_point() + 
+  theme_linedraw()
+
+```
+# Data I/O
+We can use the dataRetrieval package to download data from the USGS NWIS database.
+This provides API access to the USGS NWIS database opposed to reading from a file.
+
+``` {r, echo = TRUE}
+# Data Access
+nwis_wqp <- readWQPqw(siteNumbers = sites$SiteID, parameterCd = vars) |> 
+   select(date = ActivityStartDate,
+          parameter = CharacteristicName,
+          SiteID = MonitoringLocationIdentifier,
+          value  = ResultMeasureValue,
+          units  = ResultMeasure.MeasureUnitCode,
+          media  = ActivityMediaName) |> 
+  filter(media=='Water') |> 
+  left_join(sites, by = "SiteID") |> 
+  select(contains('Site'), date, units, parameter, value)
+
+glimpse(nwis_wqp)
+
+vis_dat(nwis_wqp)
+
+```
+
+# Data Tidying & EDA
+
+``` {r, echo = TRUE}
+conc.annual <- nwis_wqp |> 
+  mutate(year = year(date)) |> 
+  group_by(SiteID, SiteName, year, parameter) |> 
+  summarise(annual_conc = mean(value, na.rm = TRUE)) |> 
+  ungroup()
+#> `summarise()` has grouped output by 'SiteID', 'SiteName', 'year'. You can
+#> override using the `.groups` argument.
+
+# Visualize the data
+ggpubr::ggscatter(conc.annual, 
+                  x = "year", 
+                  y = "annual_conc",
+                  color = "parameter") + 
+  facet_wrap(~SiteName)
+
+```
+
+
+# Modeling
+
+``` {r, echo = TRUE}
+# Long to wide, adding data
+conc.wide = conc.annual |> 
+  pivot_wider(names_from = parameter, 
+              values_from = annual_conc) |> 
+  mutate(MgCa = Magnesium + Calcium)
+
+shapiro.test(log(conc.wide$Calcium))
+
+map(conc.wide[, c('Calcium', "MgCa")], shapiro.test)
+
+ggplot(conc.wide, aes(x  = Bicarbonate, y =MgCa)) + 
+  geom_point() + 
+  facet_wrap(~SiteName) + 
+  geom_smooth(method = "lm")
+
+
+```
+# Feature Engineering
+
+``` {r, echo = TRUE}
+
+# Feature Engineering
+rec = conc.wide |>
+  drop_na() |>
+  recipe() |>
+  step_filter(SiteName != "Dolares") |> 
+  step_sqrt("Bicarbonate", "MgCa") |> 
+  prep(conc.wide)
+
+norm_data = bake(rec, new_data = NULL)
+
+```
+

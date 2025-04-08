@@ -5,6 +5,8 @@ title: "exercise-06"
 author: "JPuyear"
 format: html
 editor: visual
+execute: 
+  echo: true
 ---
 
 ```{r setup, include=FALSE}
