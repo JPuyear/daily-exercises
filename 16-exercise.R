@@ -37,7 +37,7 @@ multinom_model <-
 rand_forest_model <-
   rand_forest() %>% 
   set_engine("ranger") %>% 
-  set_mode("clasification")
+  set_mode("classification")
 
 
 #make workflow_set to compare both models
