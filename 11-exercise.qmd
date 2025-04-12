@@ -5,8 +5,11 @@ author: "JPuyear"
 format: html
 date: "2025-04-01"
 editor: visual
+project:
+  output-dir: docs
+format: html
 execute: 
-  echo: true
+  echo: truess
 ---
 
 ## Part 1: Normality Testing
