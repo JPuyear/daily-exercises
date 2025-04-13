@@ -9,7 +9,7 @@ project:
   output-dir: docs
 format: html
 execute: 
-  echo: truess
+  echo: true
 ---
 
 ## Part 1: Normality Testing

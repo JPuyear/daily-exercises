@@ -2,7 +2,11 @@
 title: "Projects"
 format: html
 editor: visual
-output-dir: docs
+project:
+  output-dir: docs
+format: html
+execute: 
+  echo: true
 ---
 
 ![]()

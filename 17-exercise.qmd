@@ -646,3 +646,12 @@ conf_mat(final_fit, truth = forested, estimate = .pred_class)
 [Exploring Modes in the Parsnip Packages](https://www.tidymodels.org/find/parsnip/)
 
 # In a few sentences (submit to Canvas) describe why you think the XGboost model worked best for our problem
+
+```{r, echo = TRUE}
+?forested
+nrow(forested)
+str(forested)
+vis_dat(forested)
+```
+
+The XGboost model worked best because it's a collection of smaller decision trees that works well with forest data and superivsed learning. The forested dataset has 7107 rows, so it's not ideal for a random forest with does better with large datasets nor with neural networks or svm. Since there are no NA values, xgboost does a good job. There were multiple predictors influencing tree or no tree which could have had varying amounts of linearity, so linear regression was too simplistic. Likewise, logistic regression assumes a linear decision boundary. SVM needed more parameter tuning, while neural networks typically more data. Boost models analyze importance of features, which is relevant to forest cover. Also, xgboost both predicts and classifies, both of which are needed for large forested datasets.
