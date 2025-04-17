@@ -1,12 +1,9 @@
 ---
-project:
-title: "exercise-11/12"
-author: "JPuyear"
-format: html
-date: "2025-04-01"
-editor: visual
-project:
-  output-dir: docs
+title: "Daily Exercise 11/12"
+subtitle: "Statistical Testing"
+author:
+- name: Josh Puyear
+  email: "jpuyear@colostate.edu"
 format: html
 execute: 
   echo: true
@@ -24,7 +21,7 @@ library(ggpubr)
 ```
 
 ```{r, echo = TRUE}
-?airquality
+#?airquality
 colnames(airquality)
 head(airquality)
 str(airquality)
@@ -49,7 +46,7 @@ summary(airquality)
 3.  The Shapiro-Wilk test is for checking normality of a small dataset. It provides W, the Shapiro-Wilk statistic, and the p-value. The Shapiro-Wilk statistic is a number between 0 and 1 that predicts how likely a value is to be normally distributed. It compares expected values to observed valuees in order of their ocurrence in the data. Closer to 1 = more likely. A high p-value indicates a normal distribution.
 
 ```{r, echo = TRUE}
-?shapiro.test()
+#?shapiro.test()
 
 ```
 

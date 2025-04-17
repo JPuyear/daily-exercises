@@ -1,8 +1,9 @@
 ---
 title: "Daily Exercise 7"
-output-dir: docs
-author: "Joshua Puyear"
-date: "2022-02-17"
+subtitle: "Plotting COVID-19 Cases"
+author:
+- name: Josh Puyear
+  email: "jpuyear@colostate.edu"
 format: html
 execute: 
   echo: true
@@ -14,6 +15,7 @@ execute:
 # Reading COVID-19 data
 library(tidyverse)
 library(readr)
+library(ggpubr)
 url = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties-recent.csv'
 covid = read_csv(url)
 
@@ -60,7 +62,7 @@ print(plot1)
 
 ```{r, echo = TRUE}
 # Save image to img directory
-ggsave("Six_Most_Prevalent_Covid_States.png", plot = plot1, width = 10, height = 6, dpi = 300, path = ("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/06-and-up-exercise-330/imgs"))
+ggsave("Six_Most_Prevalent_Covid_States.png", plot = plot1, width = 10, height = 6, dpi = 300, path = ("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/imgs"))
 
 ```
 
@@ -87,6 +89,6 @@ print(plot2)
 
 ```{r, echo = TRUE}
 #Save image to img directory
-ggsave("Total_US_Covid-19_cases_by_Day.png", plot = plot2, width = 10, height = 6, dpi = 300, path = ("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/06-and-up-exercise-330/imgs"))
+ggsave("Total_US_Covid-19_cases_by_Day.png", plot = plot2, width = 10, height = 6, dpi = 300, path = ("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/imgs"))
 
 ```

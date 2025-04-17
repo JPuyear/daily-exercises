@@ -1,10 +1,15 @@
 ---
-title: "18-exercise"
+title: "Daily Exercise 18"
+subtitle: "In-class ML Demonstration"
+author:
+- name: Josh Puyear
+  email: "jpuyear@colostate.edu"
 format: html
-editor: visual
+execute: 
+  echo: true
 ---
 
-#The Demonstration
+# Loading Libraries, COVID url NYT
 
 ```{r, echo = TRUE}
 
@@ -29,6 +34,8 @@ census <- readr::read_csv(pop_url)
 
 ```
 
+# Data Clean
+
 ```{r, echo = TRUE}
 census = census |> 
   filter(COUNTY == "000") |>  # Filter for state-level data only
@@ -37,6 +44,7 @@ census = census |>
 
 ```
 
+# Processing COVID-19 Data: seasons columns, grouping, joining
 
 ```{r, echo = TRUE}
 # Process COVID-19 Data
@@ -69,6 +77,8 @@ state_data <-  data |>
   mutate(logC = log(season_cases +1))  # Log-transform case numbers for modeling
 ```
 
+# Inspecting, summarizing, splitting data, making a recipe
+
 ```{r, echo = TRUE}
 # Inspect Data Summary
 skimr::skim(state_data)  # Summarize dataset
@@ -87,6 +97,7 @@ rec = recipe(logC ~ . , data = train) |>
   step_center(all_numeric_predictors())  # Center numeric predictors
 ```
 
+# Coding in the Models: linear, random forest, boost, neural network, + setting engines and modes
 
 ```{r, echo = TRUE}
 # Define Regression Models
@@ -111,6 +122,8 @@ nn_mod <- mlp(hidden_units = 10) |>
   set_mode("regression")
 ```
 
+# Making a workflowset to expedite the process
+
 ```{r, echo = TRUE}
 # Create Workflow Set
 wf = workflow_set(list(rec), list(lm_mod, 
@@ -131,6 +144,8 @@ fit <- workflow() |>
   fit(data = train)
 ```
 
+# Evaluating model feature importance and prediction abilities
+
 ```{r, echo = TRUE}
 # Feature Importance
 vip::vip(fit)
@@ -142,6 +157,8 @@ predictions <- augment(fit, new_data = test) |>
 metrics(predictions, truth = logC, estimate = .pred)  # Compute regression metrics
 
 ```
+
+# Visualizing Predictions vs Actual Values
 
 ```{r, echo = TRUE}
 # Visualization of Predictions vs. Actual Values
@@ -156,6 +173,7 @@ ggplot(predictions, aes(x = logC, y = .pred)) +
 
 ```
 
+# Using the Same Workflow to Predict Deaths by Season
 
 ```{r, echo = TRUE}
 # The Assignment

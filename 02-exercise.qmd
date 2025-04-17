@@ -1,0 +1,55 @@
+---
+title: "Daily Exercise 2"
+subtitle: "First Steps of Viewing Data"
+author:
+- name: Josh Puyear
+  email: "jpuyear@colostate.edu"
+format: html
+execute: 
+  echo: true
+---
+
+# Attach the palmerspenguins\` package
+
+# 1.  Examine at the dataset using the ?Help page
+Question 1. done
+
+# 2. what is the class of the penguins dataset?
+Question 2. data.frame
+
+# 3. What is the structure of the penguins dataset?
+Question 3. data.frame
+
+# 4. what are the dimensions of the penguins dataset?
+Question 4. 344 x 17
+
+#5. What are the column names of the penguins dataset?
+
+1. "species"
+2.  "island"
+3. "bill_length_mm"
+4. "bill_depth_mm"
+5. "flipper_length_mm"
+6. "body_mass_g"
+7. "sex"
+8. "year"
+
+#6. what type of data is flipper_length_mm and Island?
+Question 6. Flipper Length (mm) is integer, Island i.s Factor
+
+# 7. what is the mean flipper length of the penguins?
+Question 7. 200.9152
+
+# 8. what is the standard deviation of flipper length in the penguins?
+Question 8. 14.06171
+
+# 9. what is the median body mass of the penguins?
+Question 9.
+
+median(penguins\$body_mass_g, na.rm=TRUE) results in
+4050 g
+
+# 10. what is the Island of the 100th penguin?
+Question 10. Dream Island
+
+## My question: what is the syntax for the function to call on 1 specific value from a column? Is there a better way than penguins\$island\[100\] ?

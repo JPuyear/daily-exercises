@@ -4,9 +4,11 @@ format: html
 editor: visual
 output-dir: docs
 ---
+
 #This activity is to demonstrate training and testing data for models.
 
 #Accessing Palmer Penguins Dataset
+
 ```{r, echo = TRUE}
 #accessing Palmer Penguins
 
@@ -20,6 +22,7 @@ set.seed(3155)
 ```
 
 # Creating Training Data
+
 ```{r, echo = TRUE}
 #create training data
 penguins_train <- training(resample_split)
@@ -28,6 +31,7 @@ glimpse(penguins_train)
 ```
 
 #Creating Testing Data
+
 ```{r, echo = TRUE}
 #create testing data
 penguins_test <- testing(resample_split)
@@ -49,7 +53,9 @@ glimpse(penguins_test)
 
 #They don't really match
 ```
-# Stratification makes the proportions even for each subset of the data 
+
+# Stratification makes the proportions even for each subset of the data
+
 ```{r, echo = TRUE}
 #Making strata
 set.seed(142)
@@ -70,6 +76,7 @@ test_strata  <- testing(penguins_strata)
 ```
 
 #Making Sure Proportions are more aligned
+
 ```{r, echo = TRUE}
 # Check the proportions
 # Dataset
@@ -94,7 +101,3 @@ vfold_cv(train_strata, v = 10) |>
 
 
 ```
-
-
-
-

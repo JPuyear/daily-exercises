@@ -1,0 +1,17 @@
+---
+editor: 
+  markdown: 
+    wrap: 72
+---
+# Practicing Writing in a QMD
+
+## About
+
+### I'm curious about connections we can draw between urban and rural ecosystems.
+
+#### I strive to link people with their local landscapes through exciting environmental lesson plans and data-informed managment decisions. I'm intensely curious about how nature-based solutions increase an ecological conscience in populated places, including the use of wild crop relatives and native seed growout and exchange. With my macroinvertebrate diversity studies and botanical monitoring around low tech restoration beaver dam analogs, I hope to support grassroots restoration efforts with data.
+
+# Projects
+
+
+

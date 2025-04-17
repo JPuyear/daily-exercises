@@ -1,7 +1,9 @@
 ---
-title: "Daily Exercise 13: Review"
-output-dir: docs
-author: "Joshua Puyear"
+title: "Daily Exercise 13"
+subtitle: "Review"
+author:
+- name: Josh Puyear
+  email: "jpuyear@colostate.edu"
 format: html
 execute: 
   echo: true

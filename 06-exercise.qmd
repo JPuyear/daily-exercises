@@ -1,10 +1,10 @@
 ---
-project:
-  output-dir: 06-and-up-exercise-330/docs
-title: "exercise-06"
-author: "JPuyear"
+title: "Daily Exercise 6"
+subtitle: "Using dplyr Verbs"
+author:
+- name: Josh Puyear
+  email: "jpuyear@colostate.edu"
 format: html
-editor: visual
 execute: 
   echo: true
 ---

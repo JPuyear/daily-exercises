@@ -1,0 +1,64 @@
+---
+title: "Daily Exercise 8"
+subtitle: "Practice Making Joins and Pivots"
+author:
+- name: Josh Puyear
+  email: "jpuyear@colostate.edu"
+format: html
+execute: 
+  echo: true
+---
+
+# Make a faceted plot of the cumulative cases & deaths by USA region. 
+Your x axis should be the date and the y axis value/count. To do this you will need to join and pivot the COVID-19 data. We can break this task down:
+
+# 1. Read in the COVID-19 Data
+```{r, echo = TRUE}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+
+url = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties-recent.csv'
+covid = read_csv(url)
+head(covid, 5)
+```
+
+# 2. Create a new data.frame using the available state.abb, state.name, state.region objects in  base R.
+Be intentional about creating a primary key to match to the COVID data!
+
+```{r, echo = TRUE}
+df <- data.frame(region = state.region,
+                 abbr = state.abb,
+                 state = state.name)
+head(df)
+```
+
+# 3. Join your new data.frame to the raw COVID data. 
+Think about right, inner, left, or full join…
+
+```{r, echo = TRUE}
+covid_region <- inner_join(df, covid, by = "state") |>
+  group_by(region, date) |>  
+  summarize(cases = sum(cases),  
+
+            deaths = sum(deaths), 
+            .groups = "drop") |>  
+# Remove grouping to prevent issues
+  pivot_longer(cols = c(cases, deaths),
+               names_to = "type",
+               values_to = "count") |>
+  ggplot(aes(x = date, y = count, group = type, color = type)) +  # Ensure grouping
+  geom_line() +                 
+  facet_grid(type ~ region) +
+  theme_bw()
+```
+
+
+# 4. Save the image to your img directory with a good file name and extension!
+
+```{r, echo = TRUE}
+ggsave("covid_cases.png", plot = covid_region, width = 10, height = 6, dpi = 300, 
+       path = "C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/imgs")
+```

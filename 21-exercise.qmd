@@ -1,0 +1,95 @@
+---
+title: "Daily Exercise 21"
+subtitle: "Time Series Practice"
+author:
+  name: Josh Puyear
+  email: "jpuyear@colostate.edu"
+editor: visual
+project:
+  output-dir: docs
+format: html
+execute: 
+  echo: true
+self-contained: true
+
+---
+
+# Downloading USGS data
+
+```{r, echo = FALSE}
+library(dataRetrieval)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(plotly)
+library(tidyverse)
+library(zoo)
+library(feasts)
+library(tsibble)
+library(ggpubr)
+library(ggplot2)
+
+# Example: Cache la Poudre River at Mouth (USGS site 06752260)
+poudre_flow <- readNWISdv(siteNumber = "06752260",    # Download data from USGS for site 06752260
+                          parameterCd = "00060",      # Parameter code 00060 = discharge in cfs)
+                          startDate = "2013-01-01",   # Set the start date
+                          endDate = "2023-12-31") |>  # Set the end date
+  renameNWISColumns() |>                              # Rename columns to standard names (e.g., "Flow", "Date")
+  mutate(Date = yearmonth(Date)) |>                   # Convert daily Date values into a year-month format (e.g., "2023 Jan")
+  group_by(Date) |>                                   # Group the data by the new monthly Date
+  summarise(Flow = mean(Flow))                       # Calculate the average daily flow for each month
+
+```
+
+
+# 1. Convert to tsibble
+```{r, echo = TRUE}
+poudre_flow <- as_tsibble(poudre_flow)
+
+head(poudre_flow)
+```
+
+# 2. Plotting time series
+```{r, echo = TRUE}
+poudre_plot <- ggscatter(poudre_flow, x = "Date", y = "Flow")+
+  geom_line(alpha = 0.5)
+
+ggplotly(poudre_plot)
+
+```
+
+# 3. Subseries
+```{r, echo = TRUE}
+gg_subseries(poudre_flow) +
+  labs(title = "Seasonal Poudre Flow Patterns",
+       y = "Average Flow",
+       x = "Date (Year)") +
+  theme_minimal()
+
+
+gg_season(poudre_flow)+
+  labs(title = "Seasonal Poudre Flow Patterns",
+       y = "Average Flow",
+       x = "Month")
+
+```
+## Answer to Question 3
+In this graphic, seasons are defined by the month. A subseries is the history of each month plotted through multiple years.
+
+# Decomposing the Data
+```{r, echo = TRUE}
+poudre_decomp <- poudre_flow |>
+  model(STL(Flow ~ season(window = "periodic"))) |>
+  components()
+
+glimpse(poudre_decomp)
+
+poudre_trend <- ggscatter(poudre_decomp, y = "trend", x = "Date")
+
+poudre_season <- ggscatter(poudre_decomp, y = "season_year", x = "Date")
+
+```
+## Answer 4.
+What I see is a gradual decrease in the Poudre's flow like a bear market trend. This could be reflective of increasing pressures on the Poudre watershed in the last decade from development and drought. Plotting season_year, trends are removed through time to just reveal seasonal patterns. With this graph, the patterns are very symmetrical, suggesting that season has a predicatble influence on river flow and there are other factors at play outside of season.
+
+

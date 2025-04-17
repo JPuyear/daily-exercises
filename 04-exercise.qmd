@@ -1,0 +1,252 @@
+---
+title: "ESS 330 Actvity 4"
+subtitle: "Meet R, Quarto, & Github"
+author: Josh Puyear
+date: last-modified
+format:
+  html:
+    toc: true
+knitr:
+  opts_chunk: 
+    echo: true
+    collapse: true
+    comment: "#>"
+---
+
+```{r}
+#| include: false
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+## Objectives:
+
+-   Fork a Github Repo
+-   Meet Quarto
+-   See some basic data
+
+## Your Assignment:
+
+1.  Read though this document in both rendered and raw `.qmd` to review Quarto syntax.
+2.  Change the author in the YML to your name
+3.  Modify the city threshold to 100,000 (no comma!!)
+4.  Re-knit the document
+5.  From the knit document, right click on the final map image and save it to the `img` directory.
+6.  Push your changes back to your repo
+7.  Submit the URL to your repo and the saved image to the Canvas Dropbox.
+
+## Data: USA Cites
+
+Accessed 01/28/2025 from: [Simplemaps](https://simplemaps.com/data/us-cities)
+
+::: callout-note
+In your rendered document, this is a call out!. **Note** both the notation for this, and the hyperlink notation for the Simple maps link above
+:::
+
+# What is Quarto:
+
+Quarto provides an unified authoring framework for data science, combining code, results, and commentary. Quarto documents are fully reproducible and support dozens of output formats, like PDFs, Word files, slideshows, and more.
+
+A `.qmd` file contains three important types of content:
+
+1.  An (optional) YAML header surrounded by `---`s which defines the:
+
+-   Output type
+-   theme
+-   metadata (author/date/title. subtitle)
+
+2.  Text mixed with simple text formatting like \# heading and *italics*.
+
+3.  Chunks of code surrounded by \`\`\`.
+
+# How do I make this thing run?
+
+Once, and only when, the document is saved ... Hit,
+
+`Cmd/Ctrl + SHIFT + K`
+
+or the `Render` button above.
+
+# Where do I see the output?
+
+The document will knit to the same directory as the `.qmd` in the format defined.
+
+Click the settings (wheel) icon next to `knit` to render the output document in a new window (Preview in Window) or in the RStudio Viewer Pane (Preview in Viewer Pane). Choose the second for now!
+
+``` yaml
+---
+title: "My First Quarto Document"
+author: "Your Name"
+date: today
+format: html
+---
+```
+
+## Quarto formatting basics
+
+### Block Quote:
+
+> Quarto provides an authoring framework for data science. You can use a single R Markdown file to both
+
+# Header 1 (H1)
+
+## Header 2 (H2)
+
+### Header 2 (H3)
+
+#### Header 4 (H4)
+
+##### Header 5 (H5)
+
+-   a bulletpointed
+-   list of
+-   things
+    -   and
+    -   smaller
+    -   things
+
+1.  Or a
+2.  numbered list
+3.  of things
+    a.  Maybe with some nested sections
+    b.  like this
+4.  Then something else...
+
+I can make something **bold** with double asterisk(\*), or *italicized* with single asterisks.
+
+Make something superscripted^UP^ or subscripted~DOWN~
+
+I can add a regular hyperlink by just writing the URL: https://github.com/mikejohnson51/csu-ess-330
+
+Or I can have [linked text](https://github.com/mikejohnson51/csu-ess-330).
+
+I can add an image:
+
+![Here's a fun globe](../img/globe-image.jpg)
+
+And I can refine the image:
+
+![Here's a smaller one](../img/globe-image.jpg){width="50%"}
+
+Or I can use knitr directly!
+
+
+I can also add document breaks with `*****`:
+
+------------------------------------------------------------------------
+
+# Code
+
+These are teasers for where we are going. If the code doesn't yet make sense that is expected!
+
+Focus on what we are doing with Quarto and the exposure to this code and workflow will help when we get to discussing them next week.
+
+## Snippets
+
+All code is run is code snippets. Code snippets can be auto generated with:
+
+`Cmd/Ctrl + Alt + I`
+
+or by clicking "insert" and then "R"
+
+------------------------------------------------------------------------
+
+In each code block, you can add cell options that affect the execution and output of executable code blocks. All options start with `#|` and can be within comments at the top of a block. For example:
+
+``` r
+#| eval: false
+...
+```
+
+The following table summarizes which types of output each option **suppresses**:
+
+| Option           | Run code | Show code | Output | Plots | Messages | Warnings |
+|:-----------------|:--------:|:---------:|:------:|:-----:|:--------:|:--------:|
+| eval: false      |    X     |           |   X    |   X   |    X     |    X     |
+| include: false   |          |     X     |   X    |   X   |    X     |    X     |
+| echo: false      |          |     X     |        |       |          |          |
+| results: "hide"  |          |           |   X    |       |          |          |
+| fig.show: "hide" |          |           |        |   X   |          |          |
+| message: false   |          |           |        |       |    X     |          |
+| warning: false   |          |           |        |       |          |    X     |
+
+::: callout-note
+Quarto supports the creation of markdown tables, look at the qmd file on how to generate the above table
+:::
+
+# Inline code:
+
+Read in our data:
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+cities <- readr::read_csv("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/data/simplemaps_uscities_basicv1.90/uscities.csv")
+```
+
+# Exploration
+
+Here we see some basic data exploration tools to see what our data looks like:
+
+```{r}
+#| eval: TRUE
+
+names(cities)
+head(cities)
+```
+
+# Some basic Data Exploration
+
+With an understanding of the data, lets answers a few questions:
+
+```{r}
+# Which cities are the most dense?
+cities  |> 
+  select(city, state_id, population, density)  |> 
+  arrange(-density)  |> 
+  head()
+
+# Which cities have the most people?
+cities  |> 
+  select(city, state_id, population, density) |> 
+  arrange(-population)  |> 
+  head()
+```
+
+## In line code:
+
+```{r}
+#| echo: false
+threshold <- 100000
+
+big_cities <-  cities |> 
+  filter(population > threshold)  |> 
+  filter(!state_name %in% c("Alaska", "Hawaii", "Puerto Rico"))
+```
+
+We can evaluate R variables and code in-line. For example, there are `r nrow(big_cities)` cities with a population greater then `r formatC(threshold, format="d", big.mark=",")`.
+
+Here is a map!
+
+```{r, filename="matplotlib.py"}
+#| echo: false
+
+big_cities  |>  
+  ggplot() + 
+  aes(x = lng, y = lat) + 
+  geom_point(aes(size = population, color = density)) + 
+  scale_color_gradient(low = "blue", high = "red") + 
+  labs(title = "USA Cities Population Stats",
+       subtitle = paste("Cities bigger than:", 
+                        formatC(threshold, format="d", big.mark=","),
+                        "people"),
+       caption = paste("Made by:", rmarkdown::metadata$author, "Joshua Puyear, ESS 330"),
+       x="",
+       y = "") + 
+  theme_bw()
+
+ggsave(filename = "big_cities.png", 
+       path = "C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/04-exercise-330/img",
+       width = 8, height = 5)
+
+```
