@@ -110,14 +110,13 @@ actual_data = poudre_flow)
 plot_modeltime_forecast(forecast)
 
 ```
-## Refit the data to actual
+## Refit the data to the full dataset
 ```{r, echo = TRUE}
 refit_tbl <- calibration_table |>
   modeltime_refit(data = poudre_flow)
 
-refit_tbl |>
+refit_forecast <- refit_tbl |>
   modeltime_forecast(h = "12 months", actual_data = poudre_flow) |> plot_modeltime_forecast()
-
 
 #Refitting:
 
@@ -144,51 +143,43 @@ poudre_24 <- readNWISdv(siteNumber = "06752260",    # Download data from USGS fo
   summarise(Flow = mean(Flow))
 
 
+poudre_24 <- poudre_24 %>% 
+  as_tsibble() %>% 
+  mutate(date = as.Date(Date))
+
 ```
 
 ## Compute the R2 value between the model predictions and the observed data using a linear model and report the meaning.
 ```{r, echo = TRUE}
-model_lm <- lm(poudre_flow$Flow ~ poudre_24$Flow)
+forecast_arima <- forecast %>% 
+  filter(.model_desc == "ARIMA(1,0,0)(0,1,0)[12]") %>% 
+  mutate(date = .index)
+
+model_lm <- lm(forecast_arima$.value ~ poudre_24$Flow)
+
+summary(model_lm)
 
 ```
 
 ## Last, generate a plot of the Predicted vs Observed values and include a 1:1 line, and a linear model line.
 ```{r, echo = TRUE}
 
+join <- left_join(poudre_24, forecast_arima, by = "date")
 
-```
+gghistogram(forecast_arima$.value)
 
-```{r, echo = TRUE}
-
-
-```
-
-```{r, echo = TRUE}
+gghistogram(poudre_24$Flow)
 
 
-```
 
-```{r, echo = TRUE}
-
-
-```
-
-```{r, echo = TRUE}
-
-
-```
-
-```{r, echo = TRUE}
-
-
-```
-
-```{r, echo = TRUE}
-
-
-```
-
-```{r, echo = TRUE}
-
+join |>
+ ggscatter(x = '.value', y = 'Flow') +
+         labs(title = "Actual vs Prediced Flow on the Poudre",
+              subtitle = "2024",
+              x = "Forecasted Flow",
+              y = "Measured Flow") + 
+  geom_smooth(method = "lm") +
+geom_abline(intercept = 0, slope = 1, color = "red") +
+  theme_bw()
 
 ```
