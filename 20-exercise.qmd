@@ -22,7 +22,6 @@ library(lightgbm)
 library(repr)
 library(plotly)
 
-
 ```
 
 # Ingest Data
@@ -214,63 +213,19 @@ dials$object
 
 ```
 
-# making an interactive model
-
-```{r, echo = TRUE}
-
-
-#my.grid <- dials |> 
- # update(trees = trees(c(50, 500))) |>
-#  grid_latin_hypercube(size = 25)
-
-#range(my.grid$trees)
-
-#plotly::plot_ly(my.grid, 
- #              x = ~trees, 
-  #            y = ~tree_depth, 
-   #            z = ~min_n)
-
-model_params <-  tune_grid(
-  wf_tune,
-  resamples = folds,
-  grid = my.grid,
-  metrics = covid_metrics
-)
-
-```
 
 #Find best model
 
+### ---- Streamlined Version ----
 ```{r, echo = TRUE}
+wf_tune <- workflow(rec, boost_tree(mode = "regression", engine = "lightgbm", trees = tune(), tree_depth = tune()))
 
-autoplot(model_params)
-
-show_best(model_params, metric = "rsq")
-show_best(model_params, metric = "rmse")
-show_best(model_params, metric = "mae")
-
+set.seed(1) 
+hp_vars <- tune_grid(wf_tune, resamples = folds, grid = 25) 
 ```
 
-hp_best \<- select_best(model_params, metric = "mae")
-
-finalize \<- finalize_workflow(wf_tune, hp_best)
-
-final_fit \<- last_fit(finalize, split, metrics = covid_metrics)
-
-collect_metrics(final_fit)
-
-collect_predictions(final_fit) \|\> ggplot(aes(x = .pred, y = logC)) + geom_point() + geom_abline() + geom_smooth(method = "lm") + theme_linedraw() + labs(title = "Final Fit", x = "Predicted (Log10)", y = "Actual (Log10)")
-
-full_pred = fit(finalize, data = state_data) \|\> augment(new_data = state_data)
-
-ggplot(full_pred, aes(x = .pred, y = logC, color = as.factor(y))) + geom_point() + geom_abline() + stat_ellipse() + geom_smooth(method = "lm") + theme_linedraw() + labs(title = "Final Fit", x = "Predicted (Log10)", y = "Actual (Log10)")
-
-### ---- Streamlined Version ----
-
-wf_tune \<- workflow(rec, boost_tree(mode = "regression", engine = "lightgbm", trees = tune(), tree_depth = tune()))
-
-set.seed(1) hp_vars \<- tune_grid(wf_tune, resamples = folds, grid = 25, \# grid_space_filling used by default, metrics = covid_metrics) \|\> select_best(metric = "mae")
-
-finalize \<- finalize_workflow(wf_tune, hp_vars) \|\> last_fit(split, metrics = covid_metrics)
+```{r, echo = TRUE}
+finalize <- finalize_workflow(wf_tune, hp_vars) |> last_fit(split, metrics = covid_metrics)
 
 collect_metrics(finalize)
+```

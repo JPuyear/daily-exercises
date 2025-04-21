@@ -1,0 +1,194 @@
+---
+title: "Daily Exercise 22"
+subtitle: "Time Series Practice with modeltime"
+author:
+  name: Josh Puyear
+  email: "jpuyear@colostate.edu"
+editor: visual
+project:
+  output-dir: docs
+format: html
+execute: 
+  echo: true
+self-contained: true
+---
+
+Use modeltime to forecast the next 12 months of streamflow data in the Poudre River based on last time assignment.
+
+Loading libraries:
+```{r, echo = TRUE}
+library(modeltime)
+library(dataRetrieval)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(plotly)
+library(tidyverse)
+library(zoo)
+library(feasts)
+library(tsibble)
+library(ggpubr)
+library(ggplot2)
+library(timetk)
+library(rsample)
+library(parsnip)
+library(patchwork)
+
+```
+Previous assingment's data.frame
+```{r, echo = TRUE}
+#previous assignment's data table
+
+poudre_flow <- readNWISdv(siteNumber = "06752260",    # Download data from USGS for site 06752260
+                          parameterCd = "00060",      # Parameter code 00060 = discharge in cfs)
+                          startDate = "2013-01-01",   # Set the start date
+                          endDate = "2023-12-31") |>  # Set the end date
+  renameNWISColumns() |>                              # Rename columns to standard names (e.g., "Flow", "Date")
+  mutate(Date = yearmonth(Date)) |>                   # Convert daily Date values into a year-month format (e.g., "2023 Jan")
+  group_by(Date) |>                                   # Group the data by the new monthly Date
+  summarise(Flow = mean(Flow))
+
+```
+
+```{r, echo = TRUE}
+#makina tsibble (also previous assignment)
+poudre_flow <- as_tsibble(poudre_flow)
+
+head(poudre_flow)
+
+```
+
+## Forecasting the next 12 months
+
+Timeseries Split
+```{r, echo = TRUE}
+
+poudre_flow <- poudre_flow |>
+  as_tibble() |>
+  mutate(date = as.Date(Date), index = NULL)
+
+
+splits <- time_series_split(poudre_flow, assess = "60 months", cumulative = TRUE)
+#assess = # of months as the testing set
+#cumulative = TRUE makes all the preceeding data the training data.
+
+training <-  training(splits)
+testing  <-  testing(splits)
+
+```
+Making the models
+
+```{r, echo = TRUE}
+mods <- list(
+  arima_reg() |> set_engine("auto_arima"),  prophet_reg() |> set_engine("prophet")
+                                          
+)
+
+```
+
+## Use the prophet_reg(), and arima_reg() function to create a Prophet model for forecasting.
+```{r, echo = TRUE}
+models <- map(mods, ~ fit(.x, Flow ~ date, data = training))
+
+
+#modeltime_table()
+
+models_tbl <- as_modeltime_table(models)
+
+#calibrate models- adds new column with test predictions and residuals
+(calibration_table <- modeltime_calibrate(models_tbl, testing, quiet = FALSE))
+
+modeltime_accuracy(calibration_table) |>
+  arrange(mae)
+
+```
+## predict flow for the next 12 months 
+```{r, echo = TRUE}
+forecast <- calibration_table |> modeltime_forecast(h = "12 months", new_data = testing,
+actual_data = poudre_flow)
+
+plot_modeltime_forecast(forecast)
+
+```
+## Refit the data to actual
+```{r, echo = TRUE}
+refit_tbl <- calibration_table |>
+  modeltime_refit(data = poudre_flow)
+
+refit_tbl |>
+  modeltime_forecast(h = "12 months", actual_data = poudre_flow) |> plot_modeltime_forecast()
+
+
+#Refitting:
+
+#Retrieves your model and preprocessing steps
+#Refits the model to the new data
+#Recalculates any automations. This includes:
+#Recalculating the changepoints for the Earth Model
+#Recalculating the ARIMA and ETS parameters
+#Preserves any parameter selections. This includes:
+#Any other defaults that are not automatic calculations are used.
+```
+
+## Use dataRetrieval to download daily streamflow for the next 12 months. Aggregate this data to monthly averages and compare it to the predictions made by your modeltime model.
+```{r, echo = TRUE}
+library(dataRetrieval)
+
+poudre_24 <- readNWISdv(siteNumber = "06752260",    # Download data from USGS for site 06752260
+                          parameterCd = "00060",      # Parameter code 00060 = discharge in cfs)
+                          startDate = "2024-01-01",   # Set the start date
+                          endDate = "2024-12-31") |>  # Set the end date
+  renameNWISColumns() |>                              # Rename columns to standard names (e.g., "Flow", "Date")
+  mutate(Date = yearmonth(Date)) |>                   # Convert daily Date values into a year-month format (e.g., "2023 Jan")
+  group_by(Date) |>                                   # Group the data by the new monthly Date
+  summarise(Flow = mean(Flow))
+
+
+```
+
+## Compute the R2 value between the model predictions and the observed data using a linear model and report the meaning.
+```{r, echo = TRUE}
+model_lm <- lm(poudre_flow$Flow ~ poudre_24$Flow)
+
+```
+
+## Last, generate a plot of the Predicted vs Observed values and include a 1:1 line, and a linear model line.
+```{r, echo = TRUE}
+
+
+```
+
+```{r, echo = TRUE}
+
+
+```
+
+```{r, echo = TRUE}
+
+
+```
+
+```{r, echo = TRUE}
+
+
+```
+
+```{r, echo = TRUE}
+
+
+```
+
+```{r, echo = TRUE}
+
+
+```
+
+```{r, echo = TRUE}
+
+
+```
+
+```{r, echo = TRUE}
+
+
+```
