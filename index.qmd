@@ -1,29 +1,51 @@
 ---
-title: "Projects"
-format: html
+title: "Projects Home"
+author:
+  name: Josh Puyear
+  email: "jpuyear@colostate.edu"
 editor: visual
 project:
   output-dir: docs
-format: html
+format:
+  html:
+    css: styles.css
+width: 100%
 execute: 
   echo: true
+self-contained: true
+
 ---
 
-![]()
+![Daily Exercise 2: First Steps of Viewing Data](C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/02-exercise.html)
 
-![]()
+![Daily Exercise 3: Writing in a .qmd]("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/03-exercise.html")
 
-![]()
+![Daily Exercise ]("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/)
 
-![]()
+![Daily Exercise ]("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/)
 
-![]()
+![Daily Exercise ]("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/)
 
-![]()
+![Daily Exercise ]("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/)
 
-![]()
+![Daily Exercise ]("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/)
 
-![]()
+![Daily Exercise ]("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/)
 
-![]()
+![Daily Exercise ]("C:/Users/Joshua Puyear/Documents/csu-undergrad/ess-330-joshp-2025/github/ess-330-daily-exercises/all-daily-exercises/)
 
+![Daily Exercise ]()
+
+![Daily Exercise ]()
+
+![Daily Exercise ]()
+
+![Daily Exercise ]()
+
+![Daily Exercise ]()
+
+![Daily Exercise ]()
+
+![Daily Exercise ]()
+
+![Daily Exercise ]()

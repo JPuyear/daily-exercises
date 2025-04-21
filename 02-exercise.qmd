@@ -5,8 +5,10 @@ author:
 - name: Josh Puyear
   email: "jpuyear@colostate.edu"
 format: html
+width: 100%
 execute: 
   echo: true
+
 ---
 
 # Attach the palmerspenguins\` package
